@@ -1,0 +1,39 @@
+{
+  "name": "youtube-ai-studio",
+  "version": "1.0.0",
+  "description": "Run and work with a local AI-powered YouTube SEO, title, hook, tag, and competitor research studio.",
+  "author": {
+    "name": "mormonshizadeh",
+    "url": "https://github.com/mormonshizadeh"
+  },
+  "homepage": "https://github.com/mormonshizadeh/youtube-ai-studio",
+  "repository": "https://github.com/mormonshizadeh/youtube-ai-studio",
+  "license": "MIT",
+  "keywords": [
+    "youtube",
+    "seo",
+    "video",
+    "creator-tools",
+    "gemini"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "YouTube AI Studio",
+    "shortDescription": "YouTube SEO, title, hook, and competitor tools",
+    "longDescription": "Launch and operate YouTube AI Studio for video analysis, hidden-tag inspection, viral title and hook generation, competitor research, and complete SEO metadata packages.",
+    "developerName": "mormonshizadeh",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Analysis",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/mormonshizadeh/youtube-ai-studio",
+    "defaultPrompt": [
+      "Launch YouTube AI Studio locally.",
+      "Analyze this YouTube video for SEO.",
+      "Create a YouTube SEO package for my topic."
+    ],
+    "brandColor": "#FF0033"
+  }
+}

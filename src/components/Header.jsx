@@ -1,11 +1,29 @@
 'use client';
 
-import React from 'react';
-import { Sparkles, Settings, Zap, Key, Flame } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Settings, LogIn, LogOut, User } from 'lucide-react';
 
 export default function Header({ onOpenSettings, hasCustomKeys }) {
+  const [session, setSession] = useState(null); // null = loading, { connected } object after
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then((r) => r.json())
+      .then(setSession)
+      .catch(() => setSession({ connected: false }));
+  }, []);
+
+  const handleConnect = () => {
+    window.location.href = '/api/auth/google';
+  };
+
+  const handleDisconnect = async () => {
+    await fetch('/api/auth/session', { method: 'DELETE' });
+    setSession({ connected: false });
+  };
+
   return (
-    <header className="glass-panel" style={{ padding: '16px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <header className="glass-panel" style={{ padding: '16px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <div style={{
           width: '42px',
@@ -35,13 +53,62 @@ export default function Header({ onOpenSettings, hasCustomKeys }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
           <Sparkles size={14} color="#34d399" />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
             AI Engine: <strong style={{ color: '#34d399' }}>Active</strong>
           </span>
         </div>
+
+        {/* YouTube Channel Connect Button */}
+        {session === null ? null : session.connected ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {session.user?.picture && (
+              <img
+                src={session.user.picture}
+                alt="avatar"
+                style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #10b981' }}
+              />
+            )}
+            <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
+              {session.user?.name || 'Connected'}
+            </span>
+            <button
+              onClick={handleDisconnect}
+              className="btn-secondary"
+              title="Disconnect YouTube channel"
+              style={{ padding: '6px 10px' }}
+            >
+              <LogOut size={14} />
+              <span>Disconnect</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleConnect}
+            className="btn-primary"
+            title="Connect your YouTube channel for private analytics"
+            style={{
+              background: 'linear-gradient(135deg, #ff2b43, #ff6b35)',
+              boxShadow: '0 4px 16px rgba(255,43,67,0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+          >
+            <LogIn size={15} />
+            <span>Connect YouTube</span>
+          </button>
+        )}
 
         <button
           onClick={onOpenSettings}
