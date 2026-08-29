@@ -5,8 +5,9 @@ import { cookies } from 'next/headers';
 export async function GET() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('yt_access_token')?.value;
-  const userName = cookieStore.get('yt_user_name')?.value;
-  const userPicture = cookieStore.get('yt_user_picture')?.value;
+  const rawName = cookieStore.get('yt_user_name')?.value;
+  const userName = rawName ? decodeURIComponent(rawName) : null;
+  const userPicture = cookieStore.get('yt_user_picture')?.value || '';
 
   if (!accessToken) {
     return NextResponse.json({ connected: false, user: null });
@@ -20,17 +21,12 @@ export async function GET() {
     );
     const channelData = await channelRes.json();
 
-    if (!channelRes.ok || channelData.error) {
-      // Token may be expired
-      return NextResponse.json({ connected: false, user: null, error: 'Token expired or invalid' });
-    }
-
     const channel = channelData.items?.[0];
     return NextResponse.json({
       connected: true,
       user: {
-        name: userName || channel?.snippet?.title || 'YouTube User',
-        picture: userPicture || channel?.snippet?.thumbnails?.default?.url || '',
+        name: channel?.snippet?.title || userName || 'YouTube Creator',
+        picture: channel?.snippet?.thumbnails?.default?.url || userPicture || '',
         channelId: channel?.id || null,
         channelTitle: channel?.snippet?.title || null,
         subscriberCount: channel?.statistics?.subscriberCount || null,
@@ -39,6 +35,12 @@ export async function GET() {
       },
     });
   } catch (err) {
-    return NextResponse.json({ connected: true, user: { name: userName, picture: userPicture } });
+    return NextResponse.json({
+      connected: true,
+      user: {
+        name: userName || 'YouTube Creator',
+        picture: userPicture || '',
+      },
+    });
   }
 }

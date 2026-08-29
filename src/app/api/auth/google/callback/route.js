@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -37,37 +36,56 @@ export async function GET(request) {
     const tokenData = await tokenResponse.json();
 
     if (!tokenResponse.ok || tokenData.error) {
-      throw new Error(tokenData.error_description || 'Token exchange failed');
+      console.error('Token exchange error:', tokenData);
+      throw new Error(tokenData.error_description || tokenData.error || 'Token exchange failed');
     }
 
     // Fetch user profile info
-    const profileResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    });
-    const profile = await profileResponse.json();
+    let profile = {};
+    try {
+      const profileResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      });
+      profile = await profileResponse.json();
+    } catch (e) {
+      console.warn('Could not fetch user profile:', e);
+    }
 
-    // Store tokens in cookies (httpOnly for security)
-    const cookieStore = await cookies();
-    cookieStore.set('yt_access_token', tokenData.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: tokenData.expires_in || 3600,
+    // Create redirect response and explicitly attach cookies to it
+    const response = NextResponse.redirect(new URL('/?connected=true', request.url));
+
+    const cookieOptions = {
       path: '/',
-    });
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: false, // allow localhost http
+      maxAge: tokenData.expires_in || 3600,
+    };
+
+    response.cookies.set('yt_access_token', tokenData.access_token, cookieOptions);
 
     if (tokenData.refresh_token) {
-      cookieStore.set('yt_refresh_token', tokenData.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+      response.cookies.set('yt_refresh_token', tokenData.refresh_token, {
+        ...cookieOptions,
         maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: '/',
       });
     }
 
-    cookieStore.set('yt_user_name', profile.name || '', { path: '/', maxAge: 3600 });
-    cookieStore.set('yt_user_picture', profile.picture || '', { path: '/', maxAge: 3600 });
+    if (profile.name) {
+      response.cookies.set('yt_user_name', encodeURIComponent(profile.name), {
+        ...cookieOptions,
+        httpOnly: false,
+      });
+    }
 
-    return NextResponse.redirect(new URL('/?connected=true', request.url));
+    if (profile.picture) {
+      response.cookies.set('yt_user_picture', profile.picture, {
+        ...cookieOptions,
+        httpOnly: false,
+      });
+    }
+
+    return response;
   } catch (err) {
     console.error('OAuth callback error:', err);
     return NextResponse.redirect(
