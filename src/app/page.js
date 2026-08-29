@@ -7,7 +7,8 @@ import TitleHookLab from '../components/TitleHookLab';
 import CompetitorRadar from '../components/CompetitorRadar';
 import SeoAutoPilot from '../components/SeoAutoPilot';
 import SettingsModal from '../components/SettingsModal';
-import { Hash, Sparkles, Radar, FileText, Zap } from 'lucide-react';
+import ChannelAnalytics from '../components/ChannelAnalytics';
+import { Hash, Sparkles, Radar, FileText, Zap, BarChart2 } from 'lucide-react';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('tags');
@@ -82,6 +83,21 @@ export default function Dashboard() {
             <FileText size={16} />
             <span>Complete SEO Package</span>
           </button>
+
+          <button
+            className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+            style={{ position: 'relative' }}
+          >
+            <BarChart2 size={16} />
+            <span>My Channel</span>
+            <span style={{
+              position: 'absolute', top: '-5px', right: '-5px',
+              background: '#10b981', color: '#fff',
+              fontSize: '0.55rem', fontWeight: 800, padding: '1px 4px',
+              borderRadius: '4px', letterSpacing: '0.03em'
+            }}>LIVE</span>
+          </button>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -106,6 +122,10 @@ export default function Dashboard() {
 
         {activeTab === 'autopilot' && (
           <SeoAutoPilot apiKeys={apiKeys} />
+        )}
+
+        {activeTab === 'analytics' && (
+          <ChannelAnalytics />
         )}
       </div>
 
