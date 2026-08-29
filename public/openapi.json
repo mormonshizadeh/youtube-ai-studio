@@ -1,0 +1,161 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "YouTube Studio AI",
+    "description": "Free VidIQ & TubeBuddy alternative. Analyze any YouTube video's hidden tags & SEO score, generate viral titles & hooks, search competitors, and create complete SEO metadata packages.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://youtube-ai-studio-khaki.vercel.app"
+    }
+  ],
+  "paths": {
+    "/api/analyze-video": {
+      "post": {
+        "operationId": "analyzeVideo",
+        "summary": "Analyze a YouTube video — extract hidden tags, calculate SEO score, and get performance metrics",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["videoUrl"],
+                "properties": {
+                  "videoUrl": {
+                    "type": "string",
+                    "description": "Full YouTube video URL or video ID (e.g. https://youtube.com/watch?v=dQw4w9WgXcQ)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Video analysis result including title, tags, SEO score and metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": { "type": "string" },
+                    "tags": { "type": "array", "items": { "type": "string" } },
+                    "description": { "type": "string" },
+                    "viewCount": { "type": "string" },
+                    "likeCount": { "type": "string" },
+                    "channelName": { "type": "string" },
+                    "seoScore": { "type": "number" },
+                    "seoAudit": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/generate-seo": {
+      "post": {
+        "operationId": "generateSeo",
+        "summary": "Generate viral titles, 3-second hooks, 15 ranked tags, full description, hashtags, and thumbnail prompt for a YouTube video topic",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["topic"],
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "description": "Video topic, title idea, or keyword to generate SEO metadata for"
+                  },
+                  "geminiKey": {
+                    "type": "string",
+                    "description": "Optional: user's own Gemini API key for AI-powered generation"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Complete SEO metadata bundle",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "titles": { "type": "array", "items": { "type": "string" } },
+                    "hooks": { "type": "array", "items": { "type": "string" } },
+                    "tags": { "type": "array", "items": { "type": "string" } },
+                    "description": { "type": "string" },
+                    "hashtags": { "type": "array", "items": { "type": "string" } },
+                    "thumbnailPrompt": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/competitor-search": {
+      "post": {
+        "operationId": "searchCompetitors",
+        "summary": "Search YouTube by keyword to find top competitor videos and detect viral outliers in any niche",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["keyword"],
+                "properties": {
+                  "keyword": {
+                    "type": "string",
+                    "description": "Search keyword or niche topic to analyze competitors for"
+                  },
+                  "youtubeKey": {
+                    "type": "string",
+                    "description": "Optional: user's own YouTube Data API v3 key"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of competitor videos with outlier detection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "videos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": { "type": "string" },
+                          "channelName": { "type": "string" },
+                          "viewCount": { "type": "string" },
+                          "isOutlier": { "type": "boolean" },
+                          "url": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
